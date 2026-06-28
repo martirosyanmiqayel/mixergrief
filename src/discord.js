@@ -31,13 +31,12 @@ export async function postApplication({ code, user, answers }) {
 }
 
 function buildEmbed({ code, user, answers }) {
-  const avatar = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
-    : null;
+  const avatar = avatarUrl(user);
   return {
     title: '📩 Заявка в Команду MixerGrief',
     color: COLOR,
-    ...(avatar ? { thumbnail: { url: avatar } } : {}),
+    author: { name: user.tag, icon_url: avatar },
+    thumbnail: { url: avatar },
     fields: [
       { name: '👤 Discord ник', value: user.tag, inline: true },
       { name: '🆔 Discord ID', value: user.id, inline: true },
@@ -46,6 +45,20 @@ function buildEmbed({ code, user, answers }) {
     footer: { text: `Код заявки: ${code}` },
     timestamp: new Date().toISOString(),
   };
+}
+
+// Аватар пользователя; если своего нет — дефолтный аватар Discord.
+function avatarUrl(user) {
+  if (user.avatar) {
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
+  }
+  let index = 0;
+  try {
+    index = Number((BigInt(user.id) >> 22n) % 6n);
+  } catch {
+    index = 0;
+  }
+  return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
 }
 
 function truncate(str, max = 1024) {
