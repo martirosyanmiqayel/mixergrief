@@ -90,6 +90,24 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Диагностика окружения (только наличие, без значений секретов) ──
+app.get('/api/health', (req, res) => {
+  const has = (k) => Boolean(process.env[k]?.trim());
+  res.json({
+    ok: true,
+    onVercel: Boolean(process.env.VERCEL),
+    env: {
+      DISCORD_CLIENT_ID: has('DISCORD_CLIENT_ID'),
+      DISCORD_CLIENT_SECRET: has('DISCORD_CLIENT_SECRET'),
+      DISCORD_REDIRECT_URI: process.env.DISCORD_REDIRECT_URI || null,
+      DISCORD_BOT_TOKEN: has('DISCORD_BOT_TOKEN'),
+      DISCORD_CHANNEL_ID: has('DISCORD_CHANNEL_ID'),
+      DISCORD_PING_ROLE_ID: has('DISCORD_PING_ROLE_ID'),
+      SESSION_SECRET: has('SESSION_SECRET'),
+    },
+  });
+});
+
 // ── Форма ──
 app.get('/api/form', (req, res) => res.json(FORM));
 
